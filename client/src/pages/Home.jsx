@@ -6,41 +6,49 @@ import { Link } from 'react-router-dom';
 const Home = () => {
   return (
     <div className="min-h-screen bg-white">
-      {/* Navbar */}
-      <nav className="sticky top-0 z-50 bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-blue-600 tracking-tight">
-                nodepad
-              </h1>
-            </div>
-            <div className="flex space-x-8">
-              <a
-                href="#"
-                className="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-blue-600 after:transition-all hover:after:w-full"
-              >
-                Home
-              </a>
-              <a
-                href="#"
-                className="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-blue-600 after:transition-all hover:after:w-full"
-              >
-                About
-              </a>
-              <Link
-                to="/app"
-                className="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-blue-600 after:transition-all hover:after:w-full"
-              >
-                Notepad
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
+  {/* Navbar */}
+<nav className="sticky top-0 z-50 bg-white border-b border-gray-200">
+  <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="flex justify-between items-center h-16">
+
+      {/* Brand */}
+      <h1 className="text-xl font-semibold text-blue-500 tracking-tight">
+        note baddie
+      </h1>
+
+      {/* Links */}
+      <div className="flex items-center gap-6 text-sm font-medium">
+        <Link
+          to="/"
+          className="text-gray-600 hover:text-blue-500 transition"
+        >
+          Home
+        </Link>
+
+        <Link
+          to="#about"
+          className="text-gray-600 hover:text-blue-500 transition"
+        >
+          About
+        </Link>
+
+        <Link
+          to="/app"
+          className="border border-gray-300 rounded-md px-3 py-1
+                     text-gray-700 hover:border-blue-500 hover:text-blue-500 transition"
+        >
+          Notepad
+        </Link>
+      </div>
+
+    </div>
+  </div>
+</nav>
+
+
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
+      <section className="bg-blue-500 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
@@ -52,13 +60,13 @@ const Home = () => {
                 creativity.
               </p>
               <Link
-  to="/notepad"
-  className="border border-gray-300 text-white-900 px-4 py-2 rounded-md inline-flex items-center gap-2 hover:bg-gray-100 transition"
->
-  <Edit size={16} />
-  <span>Start writing</span>
-</Link>
+                to="/app"
+               className="border border-white bg-blue-500 text-white px-4 py-2 inline-flex items-center gap-2 transition hover:bg-white hover:text-blue-500"
 
+              >
+                <Edit size={16} />
+                <span>Start writing</span>
+              </Link>
             </div>
             <div className="flex justify-center">
               <div className="bg-white rounded-xl shadow-2xl overflow-hidden w-full max-w-md transform hover:scale-[1.02] transition-transform duration-300">
@@ -89,187 +97,166 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-extrabold text-gray-900 mb-4">
-              Features
-            </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Everything you need, nothing you don't
+     {/* Features Section */}
+<section className="py-24 bg-white">
+  <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    {/* Header */}
+    <div className="text-center mb-16">
+      <h2 className="text-4xl font-extrabold text-gray-900 mb-4">
+        What Makes It Work
+      </h2>
+      <p className="text-lg text-gray-600 max-w-xl mx-auto">
+        Everything you need to write clearly — nothing that gets in the way.
+      </p>
+    </div>
+
+    {/* Features Grid */}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {[
+        {
+          icon: <Edit size={22} />,
+          title: "Simple Interface",
+          desc: "A clean editor designed to keep your attention on words, not buttons."
+        },
+        {
+          icon: <Search size={22} />,
+          title: "Find & Replace",
+          desc: "Quickly search and update text across your document with precision."
+        },
+        {
+          icon: <BarChart size={22} />,
+          title: "Word Count",
+          desc: "Live tracking of words and characters to measure your progress."
+        },
+        {
+          icon: <Zap size={22} />,
+          title: "AI Assistance",
+          desc: "Smart suggestions for grammar, clarity, and summarization."
+        },
+        {
+          icon: <Save size={22} />,
+          title: "Auto Save",
+          desc: "Your work is saved continuously — no buttons, no stress."
+        },
+        {
+          icon: (
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
+              />
+            </svg>
+          ),
+          title: "Markdown Support",
+          desc: "Write in Markdown with instant formatting preview."
+        }
+      ].map((item) => (
+        <div
+          key={item.title}
+          className="border border-gray-200 rounded-lg p-6 transition hover:border-blue-500"
+        >
+          <div className="text-blue-500 mb-4">
+            {item.icon}
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            {item.title}
+          </h3>
+          <p className="text-gray-600 text-sm leading-relaxed">
+            {item.desc}
+          </p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+{/* About Section */}
+<section className="py-24 bg-white">
+  <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    {/* Header */}
+    <div className="text-center mb-16">
+      <h2 className="text-4xl font-extrabold text-gray-900 mb-4">
+        What This Is
+      </h2>
+      <p className="text-lg text-gray-600 max-w-xl mx-auto">
+        A focused writing environment designed to stay out of your way.
+      </p>
+    </div>
+
+    {/* Grid */}
+    <div className="grid lg:grid-cols-2 gap-12">
+
+      {/* Left Cards */}
+      <div className="space-y-6">
+        <div className="border border-gray-200 rounded-lg p-6">
+          <p className="text-gray-700 leading-relaxed">
+            Nodepad is built for writers who prefer clarity over clutter.
+            No unnecessary controls. No visual noise. Just a calm space
+            where ideas can flow naturally.
+          </p>
+        </div>
+
+        <div className="border border-gray-200 rounded-lg p-6">
+          <p className="text-gray-700 leading-relaxed">
+            Using modern web technologies, Nodepad works smoothly across
+            devices and saves automatically — so you never lose momentum
+            or thoughts mid-sentence.
+          </p>
+        </div>
+
+        {/* Highlight */}
+        <div className="border border-blue-500 rounded-lg p-6">
+          <p className="text-blue-600 font-semibold text-center">
+            Write freely. Edit effortlessly. Create beautifully.
+          </p>
+        </div>
+      </div>
+
+      {/* Right Stats */}
+      <div className="grid grid-cols-2 gap-6">
+        {[
+          { value: "100%", label: "Focus on writing" },
+          { value: "∞", label: "Unlimited notes" },
+          { value: "0", label: "Distractions" },
+          { value: "24/7", label: "Auto-save" },
+        ].map((item) => (
+          <div
+            key={item.label}
+            className="border border-gray-200 rounded-lg p-6 text-center transition hover:border-blue-500"
+          >
+            <div className="text-4xl font-bold text-blue-500 mb-2">
+              {item.value}
+            </div>
+            <p className="text-gray-600 text-sm font-medium">
+              {item.label}
             </p>
           </div>
+        ))}
+      </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Simple Interface */}
-            <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
-              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
-                <Edit className="text-blue-600" size={24} />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">
-                Simple Interface
-              </h3>
-              <p className="text-gray-600 leading-relaxed">
-                Clean, intuitive design that gets out of your way so you can
-                focus on writing.
-              </p>
-            </div>
+    </div>
+  </div>
+</section>
 
-            {/* Find & Replace */}
-            <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
-              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
-                <Search className="text-blue-600" size={24} />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">
-                Find & Replace
-              </h3>
-              <p className="text-gray-600 leading-relaxed">
-                Quickly find text and replace it across your entire document
-                with ease.
-              </p>
-            </div>
+{/* Footer */}
+<footer className="border-t border-gray-200 bg-white">
+  <div className="max-w-6xl mx-auto px-4 py-8 text-center">
+    <p className="text-gray-500 text-sm">
+      © {new Date().getFullYear()} Nodepad — Built for focused writing
+    </p>
+  </div>
+</footer>
 
-            {/* Word Count */}
-            <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
-              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
-                <BarChart className="text-blue-600" size={24} />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">
-                Word Count
-              </h3>
-              <p className="text-gray-600 leading-relaxed">
-                Track your writing progress with real-time word, character, and
-                line counts.
-              </p>
-            </div>
 
-            {/* AI Suggestions */}
-            <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
-              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
-                <Zap className="text-blue-600" size={24} />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">
-                AI Suggestions
-              </h3>
-              <p className="text-gray-600 leading-relaxed">
-                Spell check, grammar corrections, and smart summarization
-                powered by AI.
-              </p>
-            </div>
 
-            {/* Auto Save */}
-            <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
-              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
-                <Save className="text-blue-600" size={24} />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">
-                Auto Save
-              </h3>
-              <p className="text-gray-600 leading-relaxed">
-                Never lose your work. Your documents are automatically saved as
-                you type.
-              </p>
-            </div>
-
-            {/* Markdown Support */}
-            <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
-              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
-                <svg
-                  className="w-6 h-6 text-blue-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
-                  />
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">
-                Markdown Support
-              </h3>
-              <p className="text-gray-600 leading-relaxed">
-                Write in Markdown and see formatted preview instantly.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Overview Section */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-4xl font-extrabold text-gray-900 text-center mb-12">
-              About This App
-            </h2>
-
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
-              <div>
-                <p className="text-lg text-gray-700 leading-relaxed mb-6">
-                  Nodepad is designed for writers who value simplicity and
-                  focus. We believe that the best writing happens when you're
-                  not distracted by complex interfaces or unnecessary features.
-                </p>
-                <p className="text-lg text-gray-700 leading-relaxed mb-6">
-                  Built with modern web technologies, Nodepad offers a seamless
-                  writing experience that works across all your devices. Whether
-                  you're jotting down quick notes or working on your next big
-                  project, we've got you covered.
-                </p>
-                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-100">
-                  <p className="text-xl font-semibold text-blue-700 text-center">
-                    Write freely. Edit effortlessly. Create beautifully.
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-6">
-                <div className="bg-blue-50 p-8 rounded-xl text-center">
-                  <div className="text-5xl font-extrabold text-blue-600 mb-4">
-                    100%
-                  </div>
-                  <p className="text-gray-700 font-medium">Focus on Writing</p>
-                </div>
-                <div className="bg-blue-50 p-8 rounded-xl text-center">
-                  <div className="text-5xl font-extrabold text-blue-600 mb-4">
-                    ∞
-                  </div>
-                  <p className="text-gray-700 font-medium">
-                    Unlimited Documents
-                  </p>
-                </div>
-                <div className="bg-blue-50 p-8 rounded-xl text-center">
-                  <div className="text-5xl font-extrabold text-blue-600 mb-4">
-                    0
-                  </div>
-                  <p className="text-gray-700 font-medium">Distractions</p>
-                </div>
-                <div className="bg-blue-50 p-8 rounded-xl text-center">
-                  <div className="text-5xl font-extrabold text-blue-600 mb-4">
-                    24/7
-                  </div>
-                  <p className="text-gray-700 font-medium">Auto Save</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <footer className=" bg-black border-t border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="text-center">
-            <p className="text-gray-500 text-sm">
-              © {new Date().getFullYear()} Nodepad — Minimal writing experience
-            </p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 };
