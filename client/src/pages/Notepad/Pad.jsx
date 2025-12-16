@@ -1,12 +1,13 @@
 import React from 'react';
 import { FiMaximize2, FiTrash2 } from 'react-icons/fi';
 
-function Pad({ open }) {
+function Pad({ open,toggleFullScreen ,isFullScreen}) {
   return (
-    <main
+   <main
       className={`
-        pt-16 h-screen transition-all duration-300 ease-in-out
+        h-screen transition-all duration-300 ease-in-out
         ${open ? 'ml-80' : 'ml-0'}
+        ${isFullScreen ? 'pt-0' : 'pt-16'}
       `}
     >
       <div className="h-full bg-black text-white border-l border-gray-800 flex flex-col">
@@ -29,6 +30,7 @@ function Pad({ open }) {
           <button
             className="hover:text-white transition"
             aria-label="Fullscreen"
+            onClick={toggleFullScreen}
           >
             <FiMaximize2 size={16} />
           </button>

@@ -1,6 +1,8 @@
 import React from 'react';
 
-function Header({ onMenuClick }) {
+function Header({ onMenuClick,isFullScreen }) {
+
+  if(isFullScreen) return null
   return (
     <header className="bg-black text-white flex items-center px-5 h-16 fixed top-0 left-0 right-0 z-50 border-b border-gray-800">
       

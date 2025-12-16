@@ -2,15 +2,17 @@ import React from 'react';
 import { FiSearch, FiPlus, FiChevronDown, FiMoreVertical } from 'react-icons/fi';
 import { FaRegStickyNote } from 'react-icons/fa';
 
-function Sidebar({ open }) {
+function Sidebar({ open , isFullScreen }) {
   return (
-    <aside
-      className={`
-        fixed inset-y-0 left-0 w-80 bg-gray-900 text-white z-40 pt-16
-        transform transition-transform duration-300 ease-in-out
-        ${open ? 'translate-x-0' : '-translate-x-full'}
-      `}
-    >
+     <aside
+  className={`
+    fixed left-0 w-80 bg-gray-900 text-white z-40
+    transition-all duration-300 ease-in-out
+    ${open ? 'translate-x-0' : '-translate-x-full'}
+    ${isFullScreen ? 'top-0 h-screen pt-0' : 'top-0 h-[calc(100vh)] pt-16'}
+  `}
+>
+
       <div className="h-full flex flex-col">
 
         {/* Create Note */}
