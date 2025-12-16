@@ -2,7 +2,7 @@
 import React from 'react'
 import Home from './pages/Home'
 import { Route, Routes } from 'react-router-dom'
-import Napp from './pages/Napp'
+import Napp from './pages/Notepad/Napp'
 
 
 function App() {
