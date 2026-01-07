@@ -1,27 +1,32 @@
-import React, { useState } from 'react';
-import { FiMaximize2, FiTrash2 } from 'react-icons/fi';
+import React, { useState } from "react";
+import { FiMaximize2, FiTrash2 } from "react-icons/fi";
 
-function Pad({ open,toggleFullScreen ,isFullScreen}) {
+function Pad({
+  open,
+  toggleFullScreen,
+  isFullScreen,
+  note,
+  onChange,
+  onDelete,
+}) {
+  const [cursor, setCursor] = useState({ line: 1, column: 1 });
+  const [showConfirm, setShowConfirm] = useState(false);
 
-       const [content, setContent] = useState("");
-       const [cursor, setCursor] = useState({ line: 1, column: 1 });
+  const title = note?.t1 ?? "";
+  const body = note?.t2 ?? "";
 
+  const wordCount = body
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean).length;
 
-
-       const wordCount = content.trim().split(/\s+/).filter(Boolean).length;
-
-       function calculateCursorPosition(text, position) {
-         const lines = text.slice(0, position).split("\n");
-         const line = lines.length;
-         const column = lines[lines.length - 1].length + 1;
-
-         return { line, column };
-       }
-
-       
-
-
-
+  function calculateCursorPosition(text, position) {
+    const lines = text.slice(0, position).split("\n");
+    return {
+      line: lines.length,
+      column: lines[lines.length - 1].length + 1,
+    };
+  }
 
   return (
     <main
@@ -45,9 +50,8 @@ function Pad({ open,toggleFullScreen ,isFullScreen}) {
           </div>
 
           <button
-            className="hover:text-white transition"
-            aria-label="Fullscreen"
             onClick={toggleFullScreen}
+            className="text-gray-400 hover:text-white transition-colors"
           >
             <FiMaximize2 size={16} />
           </button>
@@ -56,14 +60,20 @@ function Pad({ open,toggleFullScreen ,isFullScreen}) {
         {/* ───────── Title Bar ───────── */}
         <div className="flex items-center justify-between px-6 h-14 border-b border-gray-800">
           <input
-            type="text"
+            value={title}
+            onChange={(e) => onChange({ t1: e.target.value })}
             placeholder="Untitled note"
-            className="w-[80%] bg-transparent text-lg font-semibold text-white placeholder-gray-500 focus:outline-none"
-          />
+            className="w-[80%] bg-transparent text-lg font-semibold focus:outline-none disabled:text-gray-600"
+          />   
 
           <button
-            className="text-gray-400 hover:text-red-400 transition"
-            aria-label="Delete note"
+            disabled={!note}
+            onClick={() => setShowConfirm(true)}
+            className={`transition ${
+              note
+                ? "text-gray-400 hover:text-red-400"
+                : "text-gray-700 cursor-not-allowed"
+            }`}
           >
             <FiTrash2 size={18} />
           </button>
@@ -72,42 +82,64 @@ function Pad({ open,toggleFullScreen ,isFullScreen}) {
         {/* ───────── Writing Area ───────── */}
         <div className="flex-1 px-6 py-6 overflow-y-auto">
           <textarea
-            value={content}
-            className="
-    w-full h-full resize-none bg-transparent text-gray-200
-    focus:outline-none leading-relaxed text-base
-    placeholder-gray-500
-  "
+            value={body}
             placeholder="// Start writing your thoughts here…"
+            className="w-full h-full resize-none bg-transparent focus:outline-none disabled:text-gray-600"
             onChange={(e) => {
               const text = e.target.value;
               const pos = e.target.selectionStart;
 
-              setContent(text);
+              onChange({ t2: text });
               setCursor(calculateCursorPosition(text, pos));
             }}
-            onClick={(e) => {
-              const pos = e.target.selectionStart;
-              setCursor(calculateCursorPosition(content, pos));
-            }}
-            onKeyUp={(e) => {
-              const pos = e.target.selectionStart;
-              setCursor(calculateCursorPosition(content, pos));
-            }}
+            onClick={(e) =>
+              setCursor(calculateCursorPosition(body, e.target.selectionStart))
+            }
+            onKeyUp={(e) =>
+              setCursor(calculateCursorPosition(body, e.target.selectionStart))
+            }
           />
         </div>
 
-        {/* ───────── pad footer with row,column and count info ───────── */}
-
-        <div className="flex items-center justify-between px-6 h-10 border-b border-gray-800 text-sm text-gray-300">
-          <p className="hover:text-white transition">
+        {/* ───────── Footer ───────── */}
+        <div className="flex justify-between px-6 h-10 border-t border-gray-800 text-sm text-gray-300">
+          <p>
             Line {cursor.line}, Column {cursor.column}
           </p>
-          <p className="hover:text-white transition">
-            word count : {wordCount}
-          </p>
+          <p>Word count: {wordCount}</p>
         </div>
       </div>
+
+      {/* ───────── Confirm Delete Modal ───────── */}
+      {showConfirm && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center">
+          <div className="bg-gray-900 text-white rounded-lg p-6 w-96">
+            <h2 className="text-lg font-semibold mb-2">Delete note?</h2>
+            <p className="text-sm text-gray-300 mb-6">
+              This action cannot be undone.
+            </p>
+
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="px-4 py-2 rounded bg-gray-700 hover:bg-gray-600 transition"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={() => {
+                  onDelete();
+                  setShowConfirm(false);
+                }}
+                className="px-4 py-2 rounded bg-red-600 hover:bg-red-500 transition"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

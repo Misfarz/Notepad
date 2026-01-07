@@ -7,10 +7,13 @@ import Napp from './pages/Notepad/Napp'
 
 function App() {
   return (
-   <Routes>
+    <div className='bg-black'>
+    <Routes>
        <Route path='/' element={<Home/>}/>
        <Route path='/app' element={<Napp/>}/>
    </Routes>
+    </div>
+   
   )
 }
 
