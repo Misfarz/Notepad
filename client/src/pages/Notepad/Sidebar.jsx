@@ -9,6 +9,8 @@ function Sidebar({ open , isFullScreen,notes, currentId, onCreate, onSelect, onC
     const [showSortMenu, setShowSortMenu] = useState(false);
     const [showMoreMenu, setShowMoreMenu] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
+    const [showConfirm, setShowConfirm] = useState(false);
+    
 
     const sortedNotes = Object.entries(notes)
     .filter(([key, note]) => {
@@ -140,8 +142,7 @@ function Sidebar({ open , isFullScreen,notes, currentId, onCreate, onSelect, onC
               <div className="absolute right-0 mt-2 w-44 bg-gray-900 border border-gray-800 rounded-md shadow-lg z-50">
                 <button
                   onClick={() => {
-                    onClearAll();
-                    setShowMoreMenu(false);
+                    setShowConfirm(true)
                   }}
                   className="w-full text-left px-4 py-2 text-sm hover:bg-gray-800 text-red-400 hover:text-red-300"
                 >
@@ -201,10 +202,47 @@ function Sidebar({ open , isFullScreen,notes, currentId, onCreate, onSelect, onC
       </div>
     );
   })}
+
+
+    {/* ───────── Confirm Delete Modal ───────── */}
+      {showConfirm && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center">
+          <div className="bg-gray-900 text-white rounded-lg p-6 w-96">
+            <h2 className="text-lg font-semibold mb-2">clear all notes?</h2>
+            <p className="text-sm text-gray-300 mb-6">
+              This action cannot be undone.
+            </p>
+
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="px-4 py-2 rounded bg-gray-700 hover:bg-gray-600 transition"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={() => {
+                  onClearAll();
+                  setShowMoreMenu(false);
+                  setShowConfirm(false)
+                }}
+                className="px-4 py-2 rounded bg-red-600 hover:bg-red-500 transition"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 </div>
+
+
 
       </div>
     </aside>
+
+    
   );
 }
 
