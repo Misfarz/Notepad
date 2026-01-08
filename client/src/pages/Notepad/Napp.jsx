@@ -118,6 +118,7 @@ function Napp() {
         note={notes[currentId]}
         onChange={(data) => updateNote(currentId, data)}
         onDelete={() => deleteNote(currentId)}
+        onCreate={createNote}
       
 
 

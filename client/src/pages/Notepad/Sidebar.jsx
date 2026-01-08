@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FiSearch, FiPlus, FiChevronDown, FiMoreVertical } from 'react-icons/fi';
 import { FaRegStickyNote } from 'react-icons/fa';
-import jsPDF from 'jspdf';
+
 
 function Sidebar({ open , isFullScreen,notes, currentId, onCreate, onSelect, onClearAll }) {
 
@@ -35,25 +35,26 @@ function Sidebar({ open , isFullScreen,notes, currentId, onCreate, onSelect, onC
       setShowSortMenu(false);
     };
 
-    const handleDownloadPDF = () => {
-      if (!currentId || !notes[currentId]) return;
+   const handleDownloadTXT = () => {
+  if (!currentId || !notes[currentId]) return;
 
-      const note = notes[currentId];
-      const doc = new jsPDF();
-      
-      const title = note.t1 || "Untitled Note";
-      const body = note.t2 || "";
+  const note = notes[currentId];
+  const title = note.t1 || "Untitled_Note";
+  const body = note.t2 || "";
 
-      doc.setFontSize(20);
-      doc.text(title, 20, 20);
-      
-      doc.setFontSize(12);
-      const splitText = doc.splitTextToSize(body, 170);
-      doc.text(splitText, 20, 40);
+  // Create a Blob with the note content
+  const blob = new Blob([body], { type: "text/plain" });
 
-      doc.save(`${title.replace(/\s+/g, "_")}.pdf`);
-      setShowMoreMenu(false);
-    };
+  // Create a temporary link to trigger download
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = `${title.replace(/\s+/g, "_")}.txt`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  setShowMoreMenu(false); // if you still want to hide your menu
+};
 
 
   return (
@@ -150,7 +151,7 @@ function Sidebar({ open , isFullScreen,notes, currentId, onCreate, onSelect, onC
                 </button>
 
                 <button
-                  onClick={handleDownloadPDF}
+                  onClick={handleDownloadTXT}
                   disabled={!currentId}
                   className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-800 ${!currentId ? 'text-gray-600 cursor-not-allowed' : ''}`}
                 >
