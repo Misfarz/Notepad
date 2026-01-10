@@ -1,13 +1,16 @@
 import React, { act, useRef, useState,useEffect } from "react";
 import { FiMaximize2, FiTrash2 } from "react-icons/fi";
 
+
 /* ───────── Menu Configuration ───────── */
 const MENUS = {
-  file: ["New", "Open", "Save", "Save As", "Print"],
-  edit: ["Undo", "Redo", "Cut", "Copy","delete","select all","find and replace" ,"Paste"],
-  format: ["Bold", "Italic", "Underline"],
-  tools: ["Word Count", "Spell Check"],
-  help: ["About", "Shortcuts"],
+  File: ["New", "Open", "Save", "Save As", "Print"],
+  Edit: ["Undo", "Redo","select all","find and replace"],
+  Format: ["bold", "italic", "underline"],
+  Tools: ["Word Count", "Cursor Position"],
+  View : ["fullscreen"],
+  Help: ["About", "Shortcuts"],
+
 };
 
 function Pad({
@@ -27,6 +30,38 @@ function Pad({
   const [showToast, setShowToast] = useState(false);
   const noteArea = useRef(null)
   const fileInputRef = useRef(null);
+  const [history, setHistory] = useState([]);
+  const [future, setFuture] = useState([]);
+  const [toastMessage, setToastMessage] = useState("");
+
+
+
+const [showFindReplace, setShowFindReplace] = useState(false);
+const [findText, setFindText] = useState("");
+const [replaceText, setReplaceText] = useState("");
+const [matchCase, setMatchCase] = useState(false);
+
+
+const [showWordCount, setShowWordCount] = useState(false);
+const [showCursorInfo, setShowCursorInfo] = useState(false);
+
+
+
+const [showAIPanel, setShowAIPanel] = useState(false);
+const [activeFeature, setActiveFeature] = useState(null);
+const [aiPrompt, setAIPrompt] = useState("");
+const [aiLoading, setAILoading] = useState(false);
+
+
+
+
+
+
+  const title = note?.t1 ?? "";
+  const body = note?.t2 ?? "";
+
+  const wordCount = body.trim().split(/\s+/).filter(Boolean).length;
+
 
   useEffect(() => {
     if (showToast) {
@@ -36,10 +71,119 @@ function Pad({
   }, [showToast]);
 
 
-  const title = note?.t1 ?? "";
-  const body = note?.t2 ?? "";
+  useEffect(() => {
+  function handleKeyDown(e) {
+    if (e.ctrlKey && e.key === "z") {
+      e.preventDefault();
+      undo();
+    }
+    if (e.ctrlKey && (e.key === "y" || (e.shiftKey && e.key === "Z"))) {
+      e.preventDefault();
+      redo();
+    }
+  }
 
-  const wordCount = body.trim().split(/\s+/).filter(Boolean).length;
+  window.addEventListener("keydown", handleKeyDown);
+  return () => window.removeEventListener("keydown", handleKeyDown);
+}, [history, future, body]);
+
+async function callAI(prompt) {
+  try {
+    const res = await fetch("http://localhost:5000/api/ai", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ prompt }),
+    });
+
+    if (!res.ok) {
+      throw new Error("AI request failed");
+    }
+
+    const data = await res.json();
+    return data.result;
+  } catch (err) {
+    console.error(err);
+    return "AI error. Try again.";
+  }
+}
+
+async function handleAIAction(feature) {
+  if (aiLoading) return; // ⛔ prevent double trigger
+
+  setActiveFeature(feature);
+  setAILoading(true);
+
+  try {
+    const textarea = noteArea.current;
+    if (!textarea) throw new Error("Textarea not found");
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = body.substring(start, end) || body;
+
+    let prompt = "";
+
+    switch (feature) {
+      case "Rewrite":
+        prompt = `Rewrite this text more clearly:\n${selectedText}`;
+        break;
+      case "Fix Grammar":
+        prompt = `Fix grammar and spelling mistakes:\n${selectedText}`;
+        break;
+      case "Summarize":
+        prompt = `Summarize this text in concise bullets:\n${selectedText}`;
+        break;
+      case "Continue Writing":
+        prompt = `Continue writing naturally:\n${selectedText}`;
+        break;
+      case "Ask AI":
+        if (!aiPrompt.trim()) {
+          showToastMessage("Please enter a question");
+          return;
+        }
+        prompt = aiPrompt;
+        break;
+      default:
+        return;
+    }
+
+    const result = await callAI(prompt);
+
+    if (!result) throw new Error("Empty AI response");
+
+    if (feature !== "Ask AI") {
+      const newText =
+        body.substring(0, start) + result + body.substring(end);
+
+      setHistory((prev) => [...prev, body]);
+      setFuture([]);
+
+      onChange({ t2: newText });
+
+      requestAnimationFrame(() => {
+        textarea.focus();
+        textarea.setSelectionRange(start, start + result.length);
+      });
+    } else {
+      showToastMessage(result);
+    }
+  } catch (err) {
+    console.error(err);
+    showToastMessage("AI failed. Try again.");
+  } finally {
+    setAILoading(false); // ✅ ALWAYS runs
+  }
+}
+
+
+function showToastMessage(message) {
+  setToastMessage(message);
+  setShowToast(true);
+}
+
+  
 
   /* ───────── Cursor Position ───────── */
   function calculateCursorPosition(text, position) {
@@ -78,8 +222,13 @@ function Pad({
   function handleMenuAction(menu, action) {
     setActiveMenu(null);
 
-    if (menu === "file") handleFileAction(action);
-    if(menu === "edit") handleEditAction(action);
+    if (menu === "File") handleFileAction(action);
+    if(menu === "Edit") handleEditAction(action);
+    if(menu === "View") handleViewAction(action)
+    if (menu === "Format") handleFormatAction(action);
+    if (menu === "Tools") handleToolsAction(action);
+
+
     else console.log(`${menu.toUpperCase()} → ${action}`);
   }
 
@@ -93,6 +242,98 @@ function Pad({
     document.body.removeChild(element);
   }
 
+  function undo() {
+  if (history.length === 0) return;
+
+  const previous = history[history.length - 1];
+
+  setHistory((prev) => prev.slice(0, -1));
+  setFuture((prev) => [body, ...prev]);
+
+  onChange({ t2: previous });
+}
+
+function redo() {
+  if (future.length === 0) return;
+
+  const next = future[0];
+
+  setFuture((prev) => prev.slice(1));
+  setHistory((prev) => [...prev, body]);
+
+  onChange({ t2: next });
+}
+
+function findAR(){
+    setShowFindReplace(true)
+}
+
+function replaceOne() {
+  if (!findText) return;
+
+  const flags = matchCase ? "" : "i";
+  const regex = new RegExp(findText, flags);
+
+  const newBody = body.replace(regex, replaceText);
+
+  if (newBody !== body) {
+    setHistory((prev) => [...prev, body]);
+    setFuture([]);
+    onChange({ t2: newBody });
+  }
+
+  showToastMessage("one word replaced!")
+  setShowFindReplace(false);
+}
+
+function replaceAll() {
+  if (!findText) return;
+
+  const flags = matchCase ? "g" : "gi";
+  const regex = new RegExp(findText, flags);
+
+  const newBody = body.replace(regex, replaceText);
+
+  setHistory((prev) => [...prev, body]);
+  setFuture([]);
+  onChange({ t2: newBody });
+
+  showToastMessage("all words replaced")
+  setShowFindReplace(false);
+}
+
+function applyFormat(wrapper) {
+  const textarea = noteArea.current;
+  if (!textarea) return;
+
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
+
+  if (start === end) return; // no selection
+
+  const selectedText = body.substring(start, end);
+  const newText =
+    body.substring(0, start) +
+    wrapper + selectedText + wrapper +
+    body.substring(end);
+
+  setHistory((prev) => [...prev, body]);
+  setFuture([]);
+  onChange({ t2: newText });
+
+
+  setTimeout(() => {
+    textarea.focus();
+    textarea.setSelectionRange(
+      start + wrapper.length,
+      end + wrapper.length
+    );
+  }, 0);
+}
+
+
+
+
   function handleFileAction(action) {
     switch (action) {
       case "New":
@@ -104,7 +345,7 @@ function Pad({
         break;
       case "Save":
         // Since it auto-saves to localStorage, we just give visual feedback
-        setShowToast(true);
+        showToastMessage("saved")
         break;
       case "Save As":
         setSaveName(title || "Untitled");
@@ -118,18 +359,81 @@ function Pad({
     }
   }
 
+ function handleEditAction(action) {
+  switch (action.toLowerCase()) {
+    case "select all":
+      selectAll();
+      break;
+    case "undo":
+      undo();
+      break;
+    case "redo":
+      redo();
+      break;
+    case "find and replace" :
+      findAR()
+      break;
+    default:
+      break;
+  }
+}
 
-  function handleEditAction(action){
 
-    switch (action) {
-      case "select all":
-        selectAll()
+
+  function handleViewAction(action){
+
+      switch (action) {
+      case "fullscreen":
+        toggleFullScreen()
         break;
       default:
         break;
     }
 
   }
+
+
+  function handleFormatAction(action) {
+  switch (action.toLowerCase()) {
+    case "bold":
+      applyFormat("**");
+      showToastMessage("Bold applied");
+      break;
+    case "italic":
+      applyFormat("*");
+      showToastMessage("Italic applied");
+      break;
+    case "underline":
+      applyFormat("__");
+      showToastMessage("Underline applied");
+      break;
+    default:
+      break;
+  }
+}
+
+
+function handleToolsAction(action) {
+  switch (action.toLowerCase()) {
+    case "word count":
+      setShowWordCount((prev) => !prev);
+      showToastMessage(
+        !showWordCount ? "Word count enabled" : "Word count disabled"
+      );
+      break;
+
+    case "cursor position":
+      setShowCursorInfo((prev) => !prev);
+      showToastMessage(
+        !showCursorInfo ? "Cursor tracker enabled" : "Cursor tracker disabled"
+      );
+      break;
+
+    default:
+      break;
+  }
+}
+
 
   return (
     <main
@@ -227,11 +531,14 @@ function Pad({
           <textarea
             ref={noteArea}
             value={body}
+            disabled={aiLoading}
             placeholder="// Start writing your thoughts here…"
             className="w-full h-full resize-none bg-transparent focus:outline-none"
             onChange={(e) => {
               const text = e.target.value;
               const pos = e.target.selectionStart;
+              setHistory((prev) => [...prev, body]); // save previous state
+              setFuture([]); // clear redo stack
               onChange({ t2: text });
               setCursor(calculateCursorPosition(text, pos));
             }}
@@ -245,12 +552,23 @@ function Pad({
         </div>
 
         {/* ───────── Footer ───────── */}
+
         <div className="flex justify-between px-6 h-10 border-t border-gray-800 text-sm text-gray-300">
-          <p>
-            Line {cursor.line}, Column {cursor.column}
-          </p>
-          <p>Word count: {wordCount}</p>
+          <div>
+            {showCursorInfo && (
+              <p>
+                Line {cursor.line}, Column {cursor.column}
+              </p>
+            )}
+          </div>
+
+          <div>{showWordCount && <p>Word count: {wordCount}</p>}</div>
         </div>
+
+
+
+
+
       </div>
 
       {/* ───────── Delete Confirmation ───────── */}
@@ -292,7 +610,7 @@ function Pad({
             <h2 className="text-lg text-white font-semibold mb-4">
               Save Note As
             </h2>
-            
+
             <input
               type="text"
               value={saveName}
@@ -311,10 +629,12 @@ function Pad({
               </button>
               <button
                 onClick={() => {
-                  const finalName = saveName.endsWith(".txt") ? saveName : `${saveName}.txt`;
+                  const finalName = saveName.endsWith(".txt")
+                    ? saveName
+                    : `${saveName}.txt`;
                   downloadTxtFile(finalName, body);
                   // Optionally update internal title too
-                  onChange({ t1: saveName.replace(".txt", "") }); 
+                  onChange({ t1: saveName.replace(".txt", "") });
                   setShowSaveAs(false);
                 }}
                 className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-500 transition text-white"
@@ -326,15 +646,140 @@ function Pad({
         </div>
       )}
 
+      {/* ───────── Find & Replace Modal ───────── */}
+      {showFindReplace && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center">
+          <div className="bg-gray-900 rounded-lg p-6 w-96 border border-gray-700">
+            <h2 className="text-lg text-white font-semibold mb-4">
+              Find and Replace
+            </h2>
+
+            {/* Find */}
+            <div className="mb-3">
+              <label className="text-sm text-gray-300">Find</label>
+              <input
+                type="text"
+                value={findText}
+                onChange={(e) => setFindText(e.target.value)}
+                className="w-full bg-gray-800 text-white px-3 py-2 rounded mt-1 focus:outline-none"
+                autoFocus
+              />
+            </div>
+
+            {/* Replace */}
+            <div className="mb-3">
+              <label className="text-sm text-gray-300">Replace with</label>
+              <input
+                type="text"
+                value={replaceText}
+                onChange={(e) => setReplaceText(e.target.value)}
+                className="w-full bg-gray-800 text-white px-3 py-2 rounded mt-1 focus:outline-none"
+              />
+            </div>
+
+            {/* Match case */}
+            <label className="flex items-center gap-2 text-sm text-gray-300 mb-4">
+              <input
+                type="checkbox"
+                checked={matchCase}
+                onChange={(e) => setMatchCase(e.target.checked)}
+              />
+              Match case
+            </label>
+
+            {/* Buttons */}
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setShowFindReplace(false)}
+                className="px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded text-white"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={replaceOne}
+                className="px-3 py-2 bg-blue-600 hover:bg-blue-500 rounded text-white"
+              >
+                Replace
+              </button>
+
+              <button
+                onClick={replaceAll}
+                className="px-3 py-2 bg-green-600 hover:bg-green-500 rounded text-white"
+              >
+                Replace All
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ───────── Toast Notification ───────── */}
       {showToast && (
         <div className="fixed bottom-6 right-6 z-50 animate-fade-in-up">
           <div className="bg-gray-800 text-white px-4 py-3 rounded shadow-lg border border-gray-700 flex items-center gap-3">
             <div className="w-2 h-2 rounded-full bg-green-500"></div>
-            <p className="text-sm font-medium">Note saved successfully</p>
+            <p className="text-sm font-medium">{toastMessage}</p>
           </div>
         </div>
       )}
+
+
+      {aiLoading && (
+  <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/70">
+    <div className="bg-gray-900 border border-gray-700 rounded-lg px-8 py-6 flex flex-col items-center gap-4 pointer-events-auto">
+      <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      <p className="text-white text-sm font-medium">
+        AI is generating content…
+      </p>
+      <p className="text-gray-400 text-xs">
+        Please wait. Editing is disabled.
+      </p>
+    </div>
+  </div>
+)}
+
+
+
+
+   
+<div className="fixed bottom-40 right-10 z-[100] flex flex-col items-end gap-2">
+  {/* Bot Icon */}
+  <button
+    onClick={() => setShowAIPanel(!showAIPanel)}
+    className="bg-blue-600 hover:bg-blue-500 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg"
+  >
+    🤖
+  </button>
+
+  {/* AI Panel */}
+  {showAIPanel && (
+    <div className="mt-2 w-80 bg-gray-900 text-white rounded-lg shadow-lg border border-gray-700 p-4 flex flex-col gap-3">
+      <h2 className="text-lg font-semibold">AI Assistant</h2>
+      {["Rewrite", "Fix Grammar", "Summarize", "Continue Writing", "Ask AI"].map((feature) => (
+        <button
+          key={feature}
+          onClick={() => handleAIAction(feature)}
+          className="bg-gray-800 hover:bg-gray-700 rounded px-3 py-2 text-left w-full transition"
+        >
+          {feature}
+        </button>
+      ))}
+      {activeFeature === "Ask AI" && (
+        <input
+          type="text"
+          placeholder="Type your question..."
+          value={aiPrompt}
+          onChange={(e) => setAIPrompt(e.target.value)}
+          className="mt-2 w-full bg-gray-800 px-3 py-2 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+        />
+      )}
+    </div>
+  )}
+</div>
+
+
+
     </main>
   );
 }
